@@ -80,13 +80,20 @@ class hotmart{
         ));
         return $retorno;
     }
+    function put($endpointUrl, $parameters = null){
+        $this->checkAuth();
+        $retorno = $this->curlConnect($endpointUrl, false, $parameters, Array(
+            'Authorization: '.$this->tokenType.' '.$this->accessToken,
+        ), 'PUT');
+        return $retorno;
+    }
     private function checkAuth(){
         if(!$this->accessToken || !$this->tokenType){
             $this->throwError('require-auth', 'Require authentication!');
         }
         return true;
     }
-    private function curlConnect($url, $get = null, $post = null, $headers = null, $timeout = 5){
+    private function curlConnect($url, $get = null, $post = null, $headers = null, $timeout = 5, $customRequest = null){
         if($get && !empty($get)){
             $url = trim($url, ' /') . '?' . http_build_query($get);
         }
@@ -101,6 +108,9 @@ class hotmart{
         }
         if($headers && !empty($headers)){
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        }
+        if($customRequest){
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $customRequest);
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
