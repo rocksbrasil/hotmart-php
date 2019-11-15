@@ -73,6 +73,13 @@ class hotmart{
         ));
         return $retorno;
     }
+    function post($endpointUrl, $parameters = null){
+        $this->checkAuth();
+        $retorno = $this->curlConnect($endpointUrl, false, $parameters, Array(
+            'Authorization: '.$this->tokenType.' '.$this->accessToken,
+        ));
+        return $retorno;
+    }
     private function checkAuth(){
         if(!$this->accessToken || !$this->tokenType){
             $this->throwError('require-auth', 'Require authentication!');
@@ -88,10 +95,11 @@ class hotmart{
         if($post){
             curl_setopt($ch, CURLOPT_POST, 1);
         }
-        if (!empty($post)) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+        if(is_array($post)){
+            $headers[] = 'Content-type:application/json';
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post));
         }
-        if ($headers && !empty($headers)) {
+        if($headers && !empty($headers)){
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
